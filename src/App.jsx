@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import MagneticBackground from './components/MagneticBackground';
-import Stage1MotorSwappers from './components/Stage1MotorSwappers';
+import RightStageCanvas from './components/RightStageCanvas';
+import SlideOverDrawer from './components/SlideOverDrawer';
+import Tab1Simulator from './components/Tab1Simulator';
 import Stage2Tetrataenite from './components/Stage2Tetrataenite';
 import Stage3Curvilinear from './components/Stage3Curvilinear';
 import Stage4Superconductors from './components/Stage4Superconductors';
@@ -14,53 +15,34 @@ import {
   Sparkles, 
   ShieldCheck, 
   Globe2, 
-  ChevronRight, 
-  Sliders, 
-  Maximize2,
-  X,
+  ArrowRight,
   Compass,
   Layers,
-  ArrowUp,
-  Cpu
+  ChevronDown
 } from 'lucide-react';
 
 export default function App() {
   const [activeStage, setActiveStage] = useState(1);
-  const [scrollProgress, setScrollProgress] = useState(0);
+  const [activeDrawer, setActiveDrawer] = useState(null); // 'stage1', 'stage2', 'stage3', 'stage4', 'stage5', 'mofcom'
   const [pricingScenario, setPricingScenario] = useState('china');
-  const [isMofcomModalOpen, setIsMofcomModalOpen] = useState(false);
 
-  // References for smooth scroll navigation
-  const stageRefs = {
-    1: useRef(null),
-    2: useRef(null),
-    3: useRef(null),
-    4: useRef(null),
-    5: useRef(null),
-    mofcom: useRef(null)
-  };
+  // Stage section refs
+  const sectionRefs = [
+    useRef(null),
+    useRef(null),
+    useRef(null),
+    useRef(null),
+    useRef(null),
+  ];
 
-  const scrollToStage = (stageKey) => {
-    const el = stageRefs[stageKey]?.current;
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  };
-
-  // Scroll listener to update timeline progress and active stage
+  // Scroll spy to detect active stage
   useEffect(() => {
     const handleScroll = () => {
-      const totalScroll = document.documentElement.scrollHeight - window.innerHeight;
-      const currentScroll = window.scrollY;
-      const progress = totalScroll > 0 ? Math.min(1, Math.max(0, currentScroll / totalScroll)) : 0;
-      setScrollProgress(progress);
-
-      // Determine active stage based on position
-      const scrollY = window.scrollY + window.innerHeight * 0.35;
-      for (let s = 5; s >= 1; s--) {
-        const el = stageRefs[s]?.current;
+      const scrollY = window.scrollY + window.innerHeight * 0.45;
+      for (let i = sectionRefs.length - 1; i >= 0; i--) {
+        const el = sectionRefs[i]?.current;
         if (el && el.offsetTop <= scrollY) {
-          setActiveStage(s);
+          setActiveStage(i + 1);
           break;
         }
       }
@@ -71,273 +53,295 @@ export default function App() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const stages = [
-    { id: 1, title: 'Stage 1: Motor Swappers', subtitle: 'TODAY (2026)', icon: Zap, color: 'cyan' },
-    { id: 2, title: 'Stage 2: Tetrataenite Warning', subtitle: 'CAUTION', icon: AlertOctagon, color: 'rose' },
-    { id: 3, title: 'Stage 3: Curvilinear Magnetism', subtitle: 'NEAR FUTURE', icon: Atom, color: 'blue' },
-    { id: 4, title: 'Stage 4: MgB₂ Superconductors', subtitle: 'HEAVY INDUSTRY', icon: ThermometerSnowflake, color: 'violet' },
-    { id: 5, title: 'Stage 5: Altermagnetism', subtitle: '2030+ HORIZON', icon: Sparkles, color: 'pink' },
+  const scrollToStage = (idx) => {
+    const el = sectionRefs[idx]?.current;
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  // Stage Storytelling Data (Strict Apple-style minimalism)
+  const stagesData = [
+    {
+      id: 1,
+      number: '01',
+      badge: 'TODAY (2026)',
+      headline: 'The Motor Swappers',
+      sentence: 'Automakers bypass rare earths today using copper wound-rotors and low-cost ferrite reluctance architectures.',
+      pills: ['0% NdFeB Required', '+96% Highway Eff'],
+      toolLabel: 'Open TCO Simulator & Data',
+      drawerId: 'stage1',
+      accent: 'cyan'
+    },
+    {
+      id: 2,
+      number: '02',
+      badge: 'THE WARNING',
+      headline: 'The Cosmic Cautionary Tale',
+      sentence: 'Cambridge’s rapid tetrataenite claim was formally retracted after testing proved phosphorus contamination created false-positive ordering peaks.',
+      pills: ['Dec 2024 Retraction', '0.1% P Artifact'],
+      toolLabel: 'Inspect Retraction & Chemistry',
+      drawerId: 'stage2',
+      accent: 'rose'
+    },
+    {
+      id: 3,
+      number: '03',
+      badge: 'NEAR FUTURE',
+      headline: 'Hardness by Geometry',
+      sentence: 'Shape anisotropy in Fe-Ni-P nanowires boosts coercivity toward 440 Oe without rare earth elements.',
+      pills: ['440 Oe Lab Benchmark', 'Fe-Ni-P Nanowires'],
+      toolLabel: 'Open Shape Anisotropy Lab',
+      drawerId: 'stage3',
+      accent: 'cyan'
+    },
+    {
+      id: 4,
+      number: '04',
+      badge: 'HEAVY INDUSTRY',
+      headline: 'Delete the Magnet',
+      sentence: 'Liquid hydrogen at 20K cools zero-resistance MgB₂ coils, delivering 61% higher power density for heavy transit.',
+      pills: ['20K Liquid H₂ Coolant', '+61% Power Density'],
+      toolLabel: 'Explore Superconductor Specs',
+      drawerId: 'stage4',
+      accent: 'violet'
+    },
+    {
+      id: 5,
+      number: '05',
+      badge: '2030+ HORIZON',
+      headline: 'The Third Magnetism',
+      sentence: 'Altermagnetism pairs zero net magnetization with spin-split electron bands, positioning India to leapfrog traditional permanent magnets.',
+      pills: ['Terahertz Switching', 'Zero Stray Fields'],
+      toolLabel: 'Discover Altermagnetism Matrix',
+      drawerId: 'stage5',
+      accent: 'pink'
+    }
   ];
 
   return (
-    <div className="min-h-screen bg-[#06080d] text-slate-100 flex flex-col font-sans selection:bg-cyan-500/30 selection:text-cyan-200 relative overflow-x-hidden">
+    <div className="min-h-screen bg-[#06080d] text-slate-100 font-sans selection:bg-cyan-500/30 selection:text-cyan-200 relative">
       
-      {/* 3D Interactive Magnetic Field Canvas (Reacts to scroll & mouse) */}
-      <MagneticBackground currentStage={activeStage} scrollProgress={scrollProgress} />
+      {/* Sleek Minimal Header */}
+      <header className="fixed top-0 left-0 right-0 z-40 h-20 px-6 sm:px-12 flex items-center justify-between pointer-events-none">
+        
+        {/* Brand */}
+        <div className="flex items-center space-x-3 pointer-events-auto">
+          <div className="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse" />
+          <span className="font-extrabold text-sm sm:text-base tracking-tight font-mono text-white">
+            POST-RARE-EARTH <span className="text-cyan-400">ROADMAP</span>
+          </span>
+        </div>
 
-      {/* Sticky Pitch Header */}
-      <header className="sticky top-0 z-40 border-b border-slate-800/80 bg-[#06080d]/90 backdrop-blur-xl">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-20">
-            
-            {/* Title & Pitch Badge */}
-            <div className="flex items-center space-x-3.5">
-              <div className="h-11 w-11 rounded-xl bg-gradient-to-tr from-cyan-500 via-violet-500 to-pink-500 p-0.5 shadow-lg shadow-cyan-500/20">
-                <div className="h-full w-full bg-[#080c14] rounded-[10px] flex items-center justify-center">
-                  <Compass className="h-6 w-6 text-cyan-400" />
-                </div>
-              </div>
-              <div>
-                <div className="flex items-center space-x-2">
-                  <span className="font-extrabold tracking-tight text-lg text-white font-mono">
-                    THE POST-RARE-EARTH <span className="text-cyan-400">ROADMAP</span>
-                  </span>
-                  <span className="px-2 py-0.5 text-[10px] uppercase font-bold tracking-wider rounded bg-cyan-950/80 text-cyan-400 border border-cyan-800/60">
-                    LIVING PITCH
-                  </span>
-                </div>
-                <p className="text-xs text-slate-400 tracking-normal hidden sm:block">
-                  A Scroll-Driven 5-Stage Blueprint Beyond China's Magnet Monopoly
-                </p>
-              </div>
-            </div>
-
-            {/* Quick Actions: Global Pricing Scenario & Floating MOFCOM Trigger */}
-            <div className="flex items-center space-x-3">
-              
-              {/* Scenario Toggle */}
-              <div className="hidden md:flex items-center bg-[#0d1322] border border-slate-800 rounded-lg p-1 text-xs">
-                <span className="text-slate-400 px-2 font-mono flex items-center gap-1">
-                  <Globe2 className="w-3.5 h-3.5 text-cyan-400" />
-                  Scenario:
-                </span>
-                <button
-                  onClick={() => setPricingScenario('china')}
-                  className={`px-3 py-1 rounded-md transition-all font-mono font-medium ${
-                    pricingScenario === 'china'
-                      ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
-                      : 'text-slate-400 hover:text-slate-200'
-                  }`}
-                >
-                  China Domestic
-                </button>
-                <button
-                  onClick={() => setPricingScenario('exChinaStress')}
-                  className={`px-3 py-1 rounded-md transition-all font-mono font-medium ${
-                    pricingScenario === 'exChinaStress'
-                      ? 'bg-rose-500/20 text-rose-300 border border-rose-500/40'
-                      : 'text-slate-400 hover:text-slate-200'
-                  }`}
-                >
-                  2026 Ex-China (Dy 7.5x)
-                </button>
-              </div>
-
-              {/* Floating Quick Tool Trigger */}
-              <button
-                onClick={() => setIsMofcomModalOpen(true)}
-                className="flex items-center gap-2 px-3.5 py-1.5 rounded-lg bg-rose-500/15 border border-rose-500/40 text-rose-300 hover:bg-rose-500/25 transition-all text-xs font-mono font-semibold shadow-glow-rose"
-              >
-                <ShieldCheck className="w-4 h-4 text-rose-400" />
-                <span>MOFCOM Radar</span>
-              </button>
-            </div>
-
-          </div>
-
-          {/* Quick-Jump Timeline Navigation Bar */}
-          <div className="flex items-center space-x-2 border-t border-slate-800/60 py-2 overflow-x-auto no-scrollbar text-xs">
-            {stages.map((st) => {
-              const Icon = st.icon;
-              const isActive = activeStage === st.id;
-              return (
-                <button
-                  key={st.id}
-                  onClick={() => scrollToStage(st.id)}
-                  className={`flex items-center space-x-2 px-3 py-1.5 rounded-lg whitespace-nowrap transition-all font-mono ${
-                    isActive
-                      ? 'bg-gradient-to-r from-cyan-500/20 to-blue-500/20 text-cyan-300 border border-cyan-500/50 shadow-glow-cyan'
-                      : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40 border border-transparent'
-                  }`}
-                >
-                  <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-cyan-400' : 'text-slate-400'}`} />
-                  <span className="font-semibold">{st.title}</span>
-                  <span className="text-[10px] text-slate-400 hidden lg:inline">
-                    &bull; {st.subtitle}
-                  </span>
-                </button>
-              );
-            })}
-
+        {/* Global Controls: Pricing Scenario & MOFCOM Radar */}
+        <div className="flex items-center space-x-3 pointer-events-auto">
+          
+          <div className="hidden md:flex items-center bg-[#0d1322]/80 backdrop-blur-md border border-slate-800 rounded-full p-1 text-xs">
+            <span className="text-slate-400 px-3 font-mono text-[11px] flex items-center gap-1.5">
+              <Globe2 className="w-3.5 h-3.5 text-cyan-400" />
+              Scenario:
+            </span>
             <button
-              onClick={() => scrollToStage('mofcom')}
-              className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg whitespace-nowrap text-rose-300/80 hover:text-rose-200 hover:bg-rose-950/30 border border-rose-500/20 font-mono"
+              onClick={() => setPricingScenario('china')}
+              className={`px-3 py-1 rounded-full transition-all font-mono font-medium text-[11px] ${
+                pricingScenario === 'china'
+                  ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
             >
-              <ShieldCheck className="w-3.5 h-3.5 text-rose-400" />
-              <span>MOFCOM Compliance</span>
+              China Domestic
+            </button>
+            <button
+              onClick={() => setPricingScenario('exChinaStress')}
+              className={`px-3 py-1 rounded-full transition-all font-mono font-medium text-[11px] ${
+                pricingScenario === 'exChinaStress'
+                  ? 'bg-rose-500/20 text-rose-300 border border-rose-500/40'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              2026 Ex-China (Dy 7.5x)
             </button>
           </div>
 
+          <button
+            onClick={() => setActiveDrawer('mofcom')}
+            className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-rose-500/15 border border-rose-500/40 text-rose-300 hover:bg-rose-500/25 transition-all text-xs font-mono font-semibold backdrop-blur-md"
+          >
+            <ShieldCheck className="w-4 h-4 text-rose-400" />
+            <span>MOFCOM Radar</span>
+          </button>
         </div>
+
       </header>
 
-      {/* Main Container with Glowing Vertical Spine */}
-      <main className="relative z-10 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-10 flex-1">
-        
-        {/* Living Timeline Grid Layout: Left Spine + Right Content Sections */}
-        <div className="relative">
-          
-          {/* Animated Vertical Glowing Spine (Desktop) */}
-          <div className="hidden lg:block absolute left-8 top-8 bottom-8 w-1 bg-slate-800/80 rounded-full overflow-hidden">
-            <div 
-              className="w-full bg-gradient-to-b from-cyan-400 via-violet-400 to-pink-500 shadow-glow-cyan transition-all duration-300"
-              style={{ height: `${Math.max(6, scrollProgress * 100)}%` }}
-            />
-          </div>
-
-          <div className="space-y-24 lg:pl-20">
-            
-            {/* STAGE 1: THE MOTOR SWAPPERS */}
-            <section ref={stageRefs[1]} className="scroll-mt-28 relative">
-              {/* Glowing Timeline Marker */}
-              <div className="hidden lg:flex absolute -left-[76px] top-6 w-10 h-10 rounded-full bg-[#080d17] border-2 border-cyan-400 items-center justify-center shadow-glow-cyan text-cyan-300 font-mono text-xs font-bold">
-                01
-              </div>
-              <Stage1MotorSwappers 
-                pricingScenario={pricingScenario} 
-                setPricingScenario={setPricingScenario} 
+      {/* Far-Left Vertical Progress Rail (5 Clickable Dots) */}
+      <nav 
+        aria-label="Stage Progress" 
+        className="fixed left-6 sm:left-10 top-1/2 -translate-y-1/2 z-40 flex flex-col items-center space-y-6"
+      >
+        {stagesData.map((st, idx) => {
+          const isActive = activeStage === st.id;
+          return (
+            <button
+              key={st.id}
+              onClick={() => scrollToStage(idx)}
+              className="group relative flex items-center focus:outline-none"
+              title={`Jump to Stage ${st.number}: ${st.headline}`}
+            >
+              {/* Dot */}
+              <div 
+                className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                  isActive 
+                    ? 'bg-cyan-400 scale-125 shadow-glow-cyan' 
+                    : 'bg-slate-700 hover:bg-slate-500 scale-100'
+                }`} 
               />
-            </section>
+              
+              {/* Tooltip on hover / active */}
+              <span className={`absolute left-7 text-[11px] font-mono tracking-wider px-2 py-0.5 rounded bg-slate-900 border border-slate-800 whitespace-nowrap transition-all duration-200 ${
+                isActive 
+                  ? 'opacity-100 text-cyan-300 font-bold translate-x-0' 
+                  : 'opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 text-slate-400'
+              }`}>
+                {st.number} &bull; {st.headline}
+              </span>
+            </button>
+          );
+        })}
+      </nav>
 
-            {/* STAGE 2: TETRATAENITE - THE COSMIC CAUTIONARY TALE */}
-            <section ref={stageRefs[2]} className="scroll-mt-28 relative">
-              <div className="hidden lg:flex absolute -left-[76px] top-6 w-10 h-10 rounded-full bg-[#080d17] border-2 border-rose-500 items-center justify-center shadow-glow-rose text-rose-400 font-mono text-xs font-bold">
-                02
-              </div>
-              <Stage2Tetrataenite />
-            </section>
-
-            {/* STAGE 3: CURVILINEAR MAGNETISM */}
-            <section ref={stageRefs[3]} className="scroll-mt-28 relative">
-              <div className="hidden lg:flex absolute -left-[76px] top-6 w-10 h-10 rounded-full bg-[#080d17] border-2 border-cyan-400 items-center justify-center shadow-glow-cyan text-cyan-300 font-mono text-xs font-bold">
-                03
-              </div>
-              <Stage3Curvilinear />
-            </section>
-
-            {/* STAGE 4: MGB2 SUPERCONDUCTORS */}
-            <section ref={stageRefs[4]} className="scroll-mt-28 relative">
-              <div className="hidden lg:flex absolute -left-[76px] top-6 w-10 h-10 rounded-full bg-[#080d17] border-2 border-violet-400 items-center justify-center shadow-glow-cyan text-violet-300 font-mono text-xs font-bold">
-                04
-              </div>
-              <Stage4Superconductors />
-            </section>
-
-            {/* STAGE 5: ALTERMAGNETISM */}
-            <section ref={stageRefs[5]} className="scroll-mt-28 relative">
-              <div className="hidden lg:flex absolute -left-[76px] top-6 w-10 h-10 rounded-full bg-[#080d17] border-2 border-pink-400 items-center justify-center shadow-glow-cyan text-pink-300 font-mono text-xs font-bold">
-                05
-              </div>
-              <Stage5Altermagnetism />
-            </section>
-
-            {/* TERMINAL WIDGET: MOFCOM EXPORT COMPLIANCE CHECKER */}
-            <section ref={stageRefs.mofcom} className="scroll-mt-28 relative pt-6 border-t border-slate-800">
-              <div className="hidden lg:flex absolute -left-[76px] top-12 w-10 h-10 rounded-full bg-[#080d17] border-2 border-rose-500 items-center justify-center shadow-glow-rose text-rose-400 font-mono text-xs font-bold">
-                QC
-              </div>
-              <Tab3MOFCOMChecker />
-            </section>
-
-          </div>
-
+      {/* Main Split Layout */}
+      <div className="relative w-full">
+        
+        {/* Right Half: Persistent 3D Morphing Canvas */}
+        <div className="hidden lg:block fixed right-0 top-0 w-1/2 h-screen z-20 pointer-events-auto">
+          <RightStageCanvas activeStage={activeStage} />
         </div>
 
-      </main>
+        {/* Left Half: 5 Full-Screen Storytelling Sections (100vh each) */}
+        <div className="w-full lg:w-1/2 pl-16 sm:pl-28 pr-6 sm:pr-12 relative z-30">
+          
+          {stagesData.map((st, idx) => {
+            return (
+              <section
+                key={st.id}
+                ref={sectionRefs[idx]}
+                className="h-screen flex flex-col justify-center items-start space-y-7 snap-start"
+              >
+                {/* Stage Badge */}
+                <div className="flex items-center space-x-2.5">
+                  <span className="text-xs font-mono font-bold tracking-widest text-cyan-400 px-3 py-1 rounded-full bg-cyan-950/80 border border-cyan-800/60 uppercase">
+                    STAGE {st.number} &bull; {st.badge}
+                  </span>
+                </div>
 
-      {/* Floating Bottom Navigation HUD */}
-      <div className="fixed bottom-6 right-6 z-50 flex items-center space-x-3">
-        
-        {/* Scroll To Top Button */}
-        <button
-          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-          className="p-3 rounded-xl bg-slate-900/90 border border-slate-700 text-slate-300 hover:text-white hover:border-slate-500 transition-all shadow-xl backdrop-blur-md"
-          title="Return to Top"
-        >
-          <ArrowUp className="w-4 h-4" />
-        </button>
+                {/* Big Headline (3-5 words) */}
+                <h2 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white tracking-tight leading-[1.1]">
+                  {st.headline}
+                </h2>
 
-        {/* Floating MOFCOM Quick-Tool Button */}
-        <button
-          onClick={() => setIsMofcomModalOpen(true)}
-          className="flex items-center gap-2.5 px-4 py-3 rounded-xl bg-gradient-to-r from-rose-600 to-amber-600 text-white font-mono text-xs font-bold shadow-2xl shadow-rose-950 hover:scale-105 transition-all border border-rose-400/40"
-        >
-          <ShieldCheck className="w-4 h-4" />
-          <span>Launch MOFCOM Radar</span>
-        </button>
+                {/* ONE Plain-English sentence (max 20 words) */}
+                <p className="text-base sm:text-lg text-slate-300 font-normal leading-relaxed max-w-lg">
+                  {st.sentence}
+                </p>
+
+                {/* 2 Tiny Stat Pills */}
+                <div className="flex flex-wrap gap-2.5 pt-1">
+                  {st.pills.map((pill, pIdx) => (
+                    <span 
+                      key={pIdx}
+                      className="px-3.5 py-1.5 rounded-lg bg-slate-900/90 border border-slate-800 text-xs font-mono font-medium text-slate-200"
+                    >
+                      {pill}
+                    </span>
+                  ))}
+                </div>
+
+                {/* Action Button: Opens Glassmorphic Slide-over Drawer */}
+                <div className="pt-3">
+                  <button
+                    onClick={() => setActiveDrawer(st.drawerId)}
+                    className="flex items-center space-x-2.5 px-6 py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-[#07090e] font-mono text-xs font-bold transition-all shadow-glow-cyan hover:scale-[1.02] active:scale-[0.98]"
+                  >
+                    <span>{st.toolLabel}</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
+                </div>
+
+              </section>
+            );
+          })}
+
+        </div>
 
       </div>
 
-      {/* Floating Modal for MOFCOM Quick-Tool */}
-      {isMofcomModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fadeIn">
-          <div className="relative max-w-4xl w-full max-h-[90vh] overflow-y-auto rounded-3xl bg-[#090d16] border border-rose-500/40 p-6 shadow-2xl">
-            <div className="flex items-center justify-between pb-4 border-b border-slate-800 mb-6">
-              <div className="flex items-center gap-2.5">
-                <ShieldCheck className="w-5 h-5 text-rose-400" />
-                <h3 className="text-base font-bold text-white font-mono">
-                  MOFCOM Export Compliance &amp; De Minimis Quick Radar
-                </h3>
-              </div>
-              <button
-                onClick={() => setIsMofcomModalOpen(false)}
-                className="p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-white transition-all"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
+      {/* ========================================================= */}
+      {/* GLASSMORPHIC SLIDE-OVER DRAWERS (Zero Clutter on Main Scroll) */}
+      {/* ========================================================= */}
 
-            <Tab3MOFCOMChecker />
-          </div>
-        </div>
-      )}
+      {/* Drawer 1: Motor Swapper TCO Calculator */}
+      <SlideOverDrawer
+        isOpen={activeDrawer === 'stage1'}
+        onClose={() => setActiveDrawer(null)}
+        title="Motor Swapper TCO & BOM Replacement Simulator"
+        badge="Stage 01 Tool"
+      >
+        <Tab1Simulator 
+          pricingScenario={pricingScenario} 
+          setPricingScenario={setPricingScenario} 
+        />
+      </SlideOverDrawer>
 
-      {/* Pitch Demo Footer */}
-      <footer className="border-t border-slate-900 bg-[#05070a] py-8 text-xs text-slate-400 mt-16 relative z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center space-x-3">
-            <div className="h-7 w-7 rounded-lg bg-cyan-950 border border-cyan-800 flex items-center justify-center text-cyan-400 font-mono text-xs font-bold">
-              &mu;
-            </div>
-            <div>
-              <div className="text-slate-300 font-semibold font-mono">
-                The Post-Rare-Earth Roadmap &bull; Technical Memorandum
-              </div>
-              <div className="text-[11px] text-slate-400">
-                Data sources: MOFCOM Dual-Use Catalog 2025-2027, Nature / Cambridge Tetrataenite Retraction Dec 2024, Physical Review X (Altermagnetism).
-              </div>
-            </div>
-          </div>
+      {/* Drawer 2: Tetrataenite Retraction Deep Dive */}
+      <SlideOverDrawer
+        isOpen={activeDrawer === 'stage2'}
+        onClose={() => setActiveDrawer(null)}
+        title="Tetrataenite Retraction & Cosmic Cautionary Tale"
+        badge="Stage 02 Deep-Dive"
+      >
+        <Stage2Tetrataenite />
+      </SlideOverDrawer>
 
-          <div className="flex items-center space-x-6 text-[11px] font-mono">
-            <div className="flex items-center gap-1.5 text-emerald-400">
-              <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span>Scroll-Driven Roadmap Active</span>
-            </div>
-            <span className="text-slate-400">Three.js + Recharts + WebGL</span>
-          </div>
-        </div>
-      </footer>
+      {/* Drawer 3: Curvilinear Shape Anisotropy Lab */}
+      <SlideOverDrawer
+        isOpen={activeDrawer === 'stage3'}
+        onClose={() => setActiveDrawer(null)}
+        title="Curvilinear Magnet Geometry & 440 Oe Lab Benchmark"
+        badge="Stage 03 Lab"
+      >
+        <Stage3Curvilinear />
+      </SlideOverDrawer>
+
+      {/* Drawer 4: MgB2 Superconductors Architecture */}
+      <SlideOverDrawer
+        isOpen={activeDrawer === 'stage4'}
+        onClose={() => setActiveDrawer(null)}
+        title="MgB₂ Superconductors: 20K Liquid H₂ Heavy Duty"
+        badge="Stage 04 Specs"
+      >
+        <Stage4Superconductors />
+      </SlideOverDrawer>
+
+      {/* Drawer 5: Altermagnetism Quantum Matrix */}
+      <SlideOverDrawer
+        isOpen={activeDrawer === 'stage5'}
+        onClose={() => setActiveDrawer(null)}
+        title="Altermagnetism: The 3rd Magnetic Phase & India Leapfrog"
+        badge="Stage 05 Matrix"
+      >
+        <Stage5Altermagnetism />
+      </SlideOverDrawer>
+
+      {/* Global Drawer: MOFCOM Export Compliance Checker */}
+      <SlideOverDrawer
+        isOpen={activeDrawer === 'mofcom'}
+        onClose={() => setActiveDrawer(null)}
+        title="MOFCOM Export Compliance & 0.1% De Minimis Risk Engine"
+        badge="Customs Radar"
+      >
+        <Tab3MOFCOMChecker />
+      </SlideOverDrawer>
 
     </div>
   );
