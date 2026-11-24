@@ -7,6 +7,7 @@ import Stage3Curvilinear from './components/Stage3Curvilinear';
 import Stage4Superconductors from './components/Stage4Superconductors';
 import Stage5Altermagnetism from './components/Stage5Altermagnetism';
 import Tab3MOFCOMChecker from './components/Tab3MOFCOMChecker';
+import ARHologramMode from './components/ar/ARHologramMode';
 import { 
   Zap, 
   AlertOctagon, 
@@ -25,6 +26,7 @@ export default function App() {
   const [activeStage, setActiveStage] = useState(1);
   const [activeDrawer, setActiveDrawer] = useState(null); // 'stage1', 'stage2', 'stage3', 'stage4', 'stage5', 'mofcom'
   const [pricingScenario, setPricingScenario] = useState('china');
+  const [isAROpen, setIsAROpen] = useState(false);
 
   // Stage section refs
   const sectionRefs = [
@@ -122,8 +124,11 @@ export default function App() {
   return (
     <div className="min-h-screen bg-[#06080d] text-slate-100 font-sans selection:bg-cyan-500/30 selection:text-cyan-200 relative">
       
-      {/* Sleek Minimal Header */}
-      <header className="fixed top-0 left-0 right-0 z-40 h-20 px-6 sm:px-12 flex items-center justify-between pointer-events-none">
+      {/* Conditionally unmount main roadmap & 3D canvas when AR mode is active to prevent bleed-through and boost FPS */}
+      {!isAROpen && (
+        <>
+          {/* Sleek Minimal Header */}
+          <header className="fixed top-0 left-0 right-0 z-40 h-20 px-6 sm:px-12 flex items-center justify-between pointer-events-none">
         
         {/* Brand */}
         <div className="flex items-center space-x-3 pointer-events-auto">
@@ -169,6 +174,15 @@ export default function App() {
           >
             <ShieldCheck className="w-4 h-4 text-rose-400" />
             <span>MOFCOM Radar</span>
+          </button>
+
+          {/* AR Hand-Exploded Hologram Mode Button */}
+          <button
+            onClick={() => setIsAROpen(true)}
+            className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-gradient-to-r from-cyan-500/20 via-blue-500/20 to-purple-500/20 border border-cyan-400/50 text-cyan-200 hover:text-white hover:border-cyan-300 transition-all text-xs font-mono font-bold backdrop-blur-md shadow-glow-cyan group"
+          >
+            <Sparkles className="w-4 h-4 text-cyan-400 group-hover:rotate-12 transition-transform" />
+            <span className="tracking-wide">AR Hologram Mode</span>
           </button>
         </div>
 
@@ -342,6 +356,14 @@ export default function App() {
       >
         <Tab3MOFCOMChecker />
       </SlideOverDrawer>
+        </>
+      )}
+
+      {/* Fullscreen AR Hand-Exploded Hologram Mode */}
+      <ARHologramMode
+        isOpen={isAROpen}
+        onClose={() => setIsAROpen(false)}
+      />
 
     </div>
   );
