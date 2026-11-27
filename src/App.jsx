@@ -106,7 +106,7 @@ export default function App() {
       pills: ['20K Liquid H₂ Coolant', '+61% Power Density'],
       toolLabel: 'Explore Superconductor Specs',
       drawerId: 'stage4',
-      accent: 'violet'
+      accent: 'cyan'
     },
     {
       id: 5,
@@ -117,7 +117,7 @@ export default function App() {
       pills: ['Terahertz Switching', 'Zero Stray Fields'],
       toolLabel: 'Discover Altermagnetism Matrix',
       drawerId: 'stage5',
-      accent: 'pink'
+      accent: 'cyan'
     }
   ];
 
@@ -179,7 +179,7 @@ export default function App() {
           {/* AR Hand-Exploded Hologram Mode Button */}
           <button
             onClick={() => setIsAROpen(true)}
-            className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-gradient-to-r from-cyan-500/20 via-blue-500/20 to-purple-500/20 border border-cyan-400/50 text-cyan-200 hover:text-white hover:border-cyan-300 transition-all text-xs font-mono font-bold backdrop-blur-md shadow-glow-cyan group"
+            className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-cyan-500/15 hover:bg-cyan-500/25 border border-cyan-400/50 text-cyan-300 hover:text-white hover:border-cyan-300 transition-all text-xs font-mono font-bold backdrop-blur-md shadow-glow-cyan group"
           >
             <Sparkles className="w-4 h-4 text-cyan-400 group-hover:rotate-12 transition-transform" />
             <span className="tracking-wide">AR Hologram Mode</span>
@@ -188,7 +188,7 @@ export default function App() {
 
       </header>
 
-      {/* Far-Left Vertical Progress Rail (5 Clickable Dots) */}
+      {/* Far-Left Vertical Progress Rail (5 Clickable Dots - Clean Minimal Dots without Overlapping Tooltips) */}
       <nav 
         aria-label="Stage Progress" 
         className="fixed left-6 sm:left-10 top-1/2 -translate-y-1/2 z-40 flex flex-col items-center space-y-6"
@@ -199,26 +199,17 @@ export default function App() {
             <button
               key={st.id}
               onClick={() => scrollToStage(idx)}
-              className="group relative flex items-center focus:outline-none"
-              title={`Jump to Stage ${st.number}: ${st.headline}`}
+              className="group relative flex items-center justify-center p-1 focus:outline-none"
+              title={`Stage ${st.number}: ${st.headline}`}
             >
               {/* Dot */}
               <div 
                 className={`w-3 h-3 rounded-full transition-all duration-300 ${
                   isActive 
-                    ? 'bg-cyan-400 scale-125 shadow-glow-cyan' 
+                    ? 'bg-cyan-400 scale-125 shadow-glow-cyan ring-4 ring-cyan-500/20' 
                     : 'bg-slate-700 hover:bg-slate-500 scale-100'
                 }`} 
               />
-              
-              {/* Tooltip on hover / active */}
-              <span className={`absolute left-7 text-[11px] font-mono tracking-wider px-2 py-0.5 rounded bg-slate-900 border border-slate-800 whitespace-nowrap transition-all duration-200 ${
-                isActive 
-                  ? 'opacity-100 text-cyan-300 font-bold translate-x-0' 
-                  : 'opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 text-slate-400'
-              }`}>
-                {st.number} &bull; {st.headline}
-              </span>
             </button>
           );
         })}
@@ -245,7 +236,7 @@ export default function App() {
                 {/* Stage Badge */}
                 <div className="flex items-center space-x-2.5">
                   <span className="text-xs font-mono font-bold tracking-widest text-cyan-400 px-3 py-1 rounded-full bg-cyan-950/80 border border-cyan-800/60 uppercase">
-                    STAGE {st.number} &bull; {st.badge}
+                    STAGE {st.number} • {st.badge}
                   </span>
                 </div>
 
@@ -291,15 +282,15 @@ export default function App() {
       </div>
 
       {/* ========================================================= */}
-      {/* GLASSMORPHIC SLIDE-OVER DRAWERS (Zero Clutter on Main Scroll) */}
+      {/* FULLSCREEN 2-COLUMN VIRTUAL LABS                           */}
       {/* ========================================================= */}
 
-      {/* Drawer 1: Motor Swapper TCO Calculator */}
+      {/* Virtual Lab 1: Motor Swapper Live Dyno & TCO Simulator */}
       <SlideOverDrawer
         isOpen={activeDrawer === 'stage1'}
         onClose={() => setActiveDrawer(null)}
-        title="Motor Swapper TCO & BOM Replacement Simulator"
-        badge="Stage 01 Tool"
+        title="Stage 01 Virtual Lab: Live Powertrain Dyno & BOM Simulator"
+        badge="Stage 01 Virtual Lab"
       >
         <Tab1Simulator 
           pricingScenario={pricingScenario} 
@@ -307,52 +298,52 @@ export default function App() {
         />
       </SlideOverDrawer>
 
-      {/* Drawer 2: Tetrataenite Retraction Deep Dive */}
+      {/* Virtual Lab 2: Phosphorus Contamination & XRD Superlattice Audit */}
       <SlideOverDrawer
         isOpen={activeDrawer === 'stage2'}
         onClose={() => setActiveDrawer(null)}
-        title="Tetrataenite Retraction & Cosmic Cautionary Tale"
-        badge="Stage 02 Deep-Dive"
+        title="Stage 02 Virtual Lab: Phosphorus Contamination & XRD Audit"
+        badge="Stage 02 Virtual Lab"
       >
         <Stage2Tetrataenite />
       </SlideOverDrawer>
 
-      {/* Drawer 3: Curvilinear Shape Anisotropy Lab */}
+      {/* Virtual Lab 3: Curvilinear Shape Anisotropy Lab */}
       <SlideOverDrawer
         isOpen={activeDrawer === 'stage3'}
         onClose={() => setActiveDrawer(null)}
-        title="Curvilinear Magnet Geometry & 440 Oe Lab Benchmark"
-        badge="Stage 03 Lab"
+        title="Stage 03 Virtual Lab: Curvature Domain Pinning & 440 Oe Benchmark"
+        badge="Stage 03 Virtual Lab"
       >
         <Stage3Curvilinear />
       </SlideOverDrawer>
 
-      {/* Drawer 4: MgB2 Superconductors Architecture */}
+      {/* Virtual Lab 4: MgB2 Superconductors Cryo Lab */}
       <SlideOverDrawer
         isOpen={activeDrawer === 'stage4'}
         onClose={() => setActiveDrawer(null)}
-        title="MgB₂ Superconductors: 20K Liquid H₂ Heavy Duty"
-        badge="Stage 04 Specs"
+        title="Stage 04 Virtual Lab: MgB₂ Superconductor 20K Cryo Lab"
+        badge="Stage 04 Virtual Lab"
       >
         <Stage4Superconductors />
       </SlideOverDrawer>
 
-      {/* Drawer 5: Altermagnetism Quantum Matrix */}
+      {/* Virtual Lab 5: Altermagnetism Quantum Matrix */}
       <SlideOverDrawer
         isOpen={activeDrawer === 'stage5'}
         onClose={() => setActiveDrawer(null)}
-        title="Altermagnetism: The 3rd Magnetic Phase & India Leapfrog"
-        badge="Stage 05 Matrix"
+        title="Stage 05 Virtual Lab: Terahertz Spintronics & Zero-Dipole Matrix"
+        badge="Stage 05 Virtual Lab"
       >
         <Stage5Altermagnetism />
       </SlideOverDrawer>
 
-      {/* Global Drawer: MOFCOM Export Compliance Checker */}
+      {/* Global Virtual Lab: MOFCOM Export Compliance Checker */}
       <SlideOverDrawer
         isOpen={activeDrawer === 'mofcom'}
         onClose={() => setActiveDrawer(null)}
-        title="MOFCOM Export Compliance & 0.1% De Minimis Risk Engine"
-        badge="Customs Radar"
+        title="Customs Virtual Lab: MOFCOM Export Compliance & 0.1% De Minimis Engine"
+        badge="Customs Virtual Lab"
       >
         <Tab3MOFCOMChecker />
       </SlideOverDrawer>

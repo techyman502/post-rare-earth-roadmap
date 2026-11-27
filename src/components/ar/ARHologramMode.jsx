@@ -24,6 +24,7 @@ export default function ARHologramMode({ isOpen, onClose }) {
   const [isWebcamEnabled, setIsWebcamEnabled] = useState(true);
   const [isVideoReady, setIsVideoReady] = useState(false);
   const [webcamError, setWebcamError] = useState(null);
+  const [cameraRetryCount, setCameraRetryCount] = useState(0);
   const [isMediaPipeLoading, setIsMediaPipeLoading] = useState(true);
   const [trackingInfo, setTrackingInfo] = useState({
     handsDetected: 0,
@@ -86,17 +87,38 @@ export default function ARHologramMode({ isOpen, onClose }) {
       try {
         setWebcamError(null);
         if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-          throw new Error("Webcam access not supported in this environment.");
+          const notSupportedErr = new Error("Webcam access not supported in this environment.");
+          notSupportedErr.name = "NotSupportedError";
+          throw notSupportedErr;
         }
 
-        const stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: 'user', width: 640, height: 480 },
-          audio: false
-        });
+        // Clean up any lingering stream before starting a new one
+        if (streamRef.current) {
+          streamRef.current.getTracks().forEach(track => track.stop());
+          streamRef.current = null;
+        }
+
+        let stream = null;
+        try {
+          // Attempt 1: Try 1280x720 ideal resolution with user facing mode
+          stream = await navigator.mediaDevices.getUserMedia({
+            video: { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: 'user' },
+            audio: false
+          });
+        } catch (constraintErr) {
+          console.warn("Primary 720p camera constraints failed, falling back to { video: true }:", constraintErr);
+          // Attempt 2: Fall back to default video constraints if OverconstrainedError or NotFoundError occurs
+          stream = await navigator.mediaDevices.getUserMedia({
+            video: true,
+            audio: false
+          });
+        }
 
         // StrictMode race check: immediately release if unmounted
         if (isCancelled) {
-          stream.getTracks().forEach(track => track.stop());
+          if (stream) {
+            stream.getTracks().forEach(track => track.stop());
+          }
           return;
         }
 
@@ -148,7 +170,10 @@ export default function ARHologramMode({ isOpen, onClose }) {
       } catch (err) {
         if (!isCancelled) {
           console.warn("Camera initialization error:", err);
-          setWebcamError("Camera unavailable. Fallback mouse drag & slider enabled.");
+          setWebcamError({
+            name: err.name || 'CameraError',
+            message: err.message || 'Camera stream unavailable. Fallback mouse drag & slider enabled.'
+          });
           setIsVideoReady(false);
         }
       }
@@ -167,7 +192,7 @@ export default function ARHologramMode({ isOpen, onClose }) {
         videoRef.current.srcObject = null;
       }
     };
-  }, [isOpen, isWebcamEnabled]);
+  }, [isOpen, isWebcamEnabled, cameraRetryCount]);
 
   // Clean shutdown on unmount / exit
   const handleExitAR = useCallback(() => {
@@ -463,7 +488,7 @@ export default function ARHologramMode({ isOpen, onClose }) {
           const mappedExplode = Math.max(0, Math.min(1, (normDist - minSpread) / (maxSpread - minSpread)));
 
           gState.targetExplode = mappedExplode;
-          activeGestureName = `👐 2-HAND PULL [${(mappedExplode * 100).toFixed(0)}%]`;
+          activeGestureName = `2-HAND PULL [${(mappedExplode * 100).toFixed(0)}%]`;
 
           // Draw Glowing Laser Link between hands
           ctx.save();
@@ -537,7 +562,7 @@ export default function ARHologramMode({ isOpen, onClose }) {
             const targetScale = 0.6 + t * (2.2 - 0.6);
             gState.targetScale = targetScale;
 
-            activeGestureName = `✌ 2-FINGER ZOOM [${gState.currentScale.toFixed(1)}x]`;
+            activeGestureName = `2-FINGER ZOOM [${gState.currentScale.toFixed(1)}x]`;
 
             // Draw glowing cyan line connecting thumb tip and index tip
             ctx.save();
@@ -596,7 +621,7 @@ export default function ARHologramMode({ isOpen, onClose }) {
               gState.targetRotX += deltaY * 3.8;
             }
             gState.lastPalmPoint = palmCenter;
-            activeGestureName = '✋ PALM MOVE (ROTATING)';
+            activeGestureName = 'PALM MOVE (ROTATING)';
           }
         } else {
           // 0 hands
@@ -729,6 +754,11 @@ export default function ARHologramMode({ isOpen, onClose }) {
 
         const curExp = gState.currentExplode;
         const newProjected = [];
+
+        // Dynamic per-frame model updates (precession, pulses, waves)
+        if (modelData.update) {
+          modelData.update(now, curExp);
+        }
 
         modelData.components.forEach(comp => {
           if (comp.object) {
@@ -1004,7 +1034,7 @@ export default function ARHologramMode({ isOpen, onClose }) {
             </div>
             <div className="text-[10px] font-mono text-cyan-400/80 flex items-center gap-2">
               <span>{trackingInfo.gesture}</span>
-              <span>&bull;</span>
+              <span>•</span>
               <span>{trackingInfo.fps} FPS</span>
             </div>
           </div>
@@ -1013,15 +1043,15 @@ export default function ARHologramMode({ isOpen, onClose }) {
         {/* Center: Live Gesture Instruction Pill (Conflict-Free Guide) */}
         <div className="hidden lg:flex items-center space-x-4 bg-[#080d1a]/85 backdrop-blur-md border border-slate-800 rounded-full px-5 py-2 text-xs font-mono shadow-xl">
           <div className="flex items-center gap-1.5 text-cyan-300">
-            <span>✌ 2-Finger Spread: Zoom ({trackingInfo.zoomScale}x)</span>
+            <span>2-Finger Spread: Zoom ({trackingInfo.zoomScale}x)</span>
           </div>
           <div className="w-1 h-1 rounded-full bg-slate-700" />
           <div className="flex items-center gap-1.5 text-amber-300">
-            <span>✋ Palm Move: Rotate</span>
+            <span>Palm Move: Rotate</span>
           </div>
           <div className="w-1 h-1 rounded-full bg-slate-700" />
           <div className="flex items-center gap-1.5 text-emerald-300">
-            <span>👐 2-Hand Pull: Explode ({trackingInfo.explodePercent}%)</span>
+            <span>2-Hand Pull: Explode ({trackingInfo.explodePercent}%)</span>
           </div>
         </div>
 
@@ -1085,9 +1115,24 @@ export default function ARHologramMode({ isOpen, onClose }) {
       )}
 
       {webcamError && (
-        <div className="fixed top-24 left-1/2 -translate-x-1/2 z-40 bg-slate-900/90 border border-amber-500/40 text-amber-200 px-4 py-2 rounded-xl font-mono text-xs flex items-center gap-2.5 backdrop-blur-md shadow-xl max-w-md">
+        <div className="fixed top-24 left-1/2 -translate-x-1/2 z-40 bg-slate-900/95 border border-amber-500/50 text-amber-200 px-4 py-2.5 rounded-xl font-mono text-xs flex items-center gap-3 backdrop-blur-md shadow-2xl max-w-lg">
           <AlertCircle className="w-4 h-4 text-amber-400 shrink-0" />
-          <span>{webcamError}</span>
+          <div className="flex-1 truncate">
+            <span className="font-bold text-amber-300">[{typeof webcamError === 'object' ? webcamError.name : 'CameraError'}]:</span>{' '}
+            <span className="text-slate-300 text-[11px]">
+              {typeof webcamError === 'object' ? webcamError.message : webcamError}
+            </span>
+          </div>
+          <button
+            onClick={() => {
+              setWebcamError(null);
+              setCameraRetryCount(c => c + 1);
+            }}
+            className="px-2.5 py-1 rounded bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 border border-amber-500/40 font-mono text-[11px] font-bold flex items-center gap-1.5 shrink-0 transition-colors"
+          >
+            <RefreshCw className="w-3 h-3" />
+            <span>Retry Camera</span>
+          </button>
         </div>
       )}
 
@@ -1138,7 +1183,7 @@ export default function ARHologramMode({ isOpen, onClose }) {
           </button>
         </div>
 
-        {/* 5-Model Switching Glassmorphic Pill Bar */}
+        {/* 6-Model Switching Glassmorphic Pill Bar */}
         <div className="flex items-center gap-2 overflow-x-auto max-w-full p-1.5 bg-[#070b14]/90 backdrop-blur-xl border border-slate-800 rounded-2xl shadow-2xl">
           {MODEL_BUILDERS.map((model, idx) => {
             const isActive = activeModelIndex === idx;

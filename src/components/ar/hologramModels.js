@@ -452,13 +452,13 @@ export function buildEESMWoundRotor() {
     desc: 'Electromagnet coils excited by controllable DC current. Allows complete flux shutoff at 130 km/h for zero drag and 96.8% highway efficiency.'
   });
 
-  // 4. Brushless Inductive Exciter Ring (Violet Glowing Ring)
+  // 4. Brushless Inductive Exciter Ring (Amber Glowing Ring)
   const exciterGroup = new THREE.Group();
   const torusGeom = new THREE.TorusGeometry(0.85, 0.18, 12, 36);
   const torusWire = new THREE.WireframeGeometry(torusGeom);
   const torusLine = new THREE.LineSegments(
     torusWire,
-    new THREE.LineBasicMaterial({ color: 0xa855f7, transparent: true, opacity: 0.85, blending: THREE.AdditiveBlending })
+    new THREE.LineBasicMaterial({ color: 0xf59e0b, transparent: true, opacity: 0.85, blending: THREE.AdditiveBlending })
   );
   torusLine.rotation.x = Math.PI / 2;
   torusLine.position.y = -1.6;
@@ -474,7 +474,7 @@ export function buildEESMWoundRotor() {
   const discGeom = new THREE.BufferGeometry();
   discGeom.setAttribute('position', new THREE.Float32BufferAttribute(discPts, 3));
   const discMat = new THREE.PointsMaterial({
-    color: 0xc084fc,
+    color: 0xfbbf24,
     size: 0.1,
     map: particleTex,
     transparent: true,
@@ -488,7 +488,7 @@ export function buildEESMWoundRotor() {
     id: 'exciter',
     name: 'Brushless Inductive Exciter Wheel',
     badge: 'Zero Carbon Brushes / Contactless Wireless Transfer',
-    color: '#a855f7',
+    color: '#f59e0b',
     object: exciterGroup,
     basePosition: new THREE.Vector3(0, 0, 0),
     explodeOffset: new THREE.Vector3(0, -2.1, 0),
@@ -734,7 +734,7 @@ export function buildMgB2Superconductor() {
     desc: 'Magnesium Diboride tapes carrying up to 10,000 A/cm² current density with zero I²R Joule heating losses, boosting power density by +61%.'
   });
 
-  // 3. Liquid Hydrogen Cryogenic Channel (Violet / Deep Blue Core)
+  // 3. Liquid Hydrogen Cryogenic Channel (Cyan / Deep Ice-Blue Core)
   const h2Group = new THREE.Group();
   const h2Pts = [];
   for (let i = 0; i < 450; i++) {
@@ -746,7 +746,7 @@ export function buildMgB2Superconductor() {
   const h2Geom = new THREE.BufferGeometry();
   h2Geom.setAttribute('position', new THREE.Float32BufferAttribute(h2Pts, 3));
   const h2Mat = new THREE.PointsMaterial({
-    color: 0x818cf8,
+    color: 0x06b6d4,
     size: 0.14,
     map: particleTex,
     transparent: true,
@@ -755,7 +755,7 @@ export function buildMgB2Superconductor() {
   });
   h2Group.add(new THREE.Points(h2Geom, h2Mat));
 
-  const coreCylinder = createWireframeCylinder(0.98, 0.98, 3.2, 16, 6, 0x6366f1, 0.5);
+  const coreCylinder = createWireframeCylinder(0.98, 0.98, 3.2, 16, 6, 0x0891b2, 0.5);
   h2Group.add(coreCylinder);
 
   group.add(h2Group);
@@ -763,7 +763,7 @@ export function buildMgB2Superconductor() {
     id: 'lh2-cooling',
     name: 'Liquid Hydrogen Cooling Channel (20K)',
     badge: 'Dual Role: Cryogenic Coolant + Fuel Cell Fuel',
-    color: '#818cf8',
+    color: '#06b6d4',
     object: h2Group,
     basePosition: new THREE.Vector3(0, 0, 0),
     explodeOffset: new THREE.Vector3(0, -1.2, 0),
@@ -798,11 +798,329 @@ export function buildMgB2Superconductor() {
   };
 }
 
+// =========================================================================
+// MODEL 6: Altermagnetism (THz Zero-Dipole) — Model 06
+// =========================================================================
+export function buildAltermagnetUnitCell() {
+  const group = new THREE.Group();
+  const particleTex = getParticleTexture();
+  const components = [];
+
+  const spinPivotsA = [];
+  const spinPivotsB = [];
+
+  // Helper: Create a directional spin vector arrow inside a precessing pivot
+  function createSpinArrow(colorHex, isUpward = true) {
+    const pivot = new THREE.Group();
+    
+    // Cylindrical shaft
+    const shaftGeom = new THREE.CylinderGeometry(0.025, 0.025, 0.54, 8);
+    const shaftMat = new THREE.MeshBasicMaterial({ color: colorHex });
+    const shaft = new THREE.Mesh(shaftGeom, shaftMat);
+    shaft.position.y = isUpward ? 0.27 : -0.27;
+
+    // Conical arrowhead
+    const headGeom = new THREE.ConeGeometry(0.075, 0.18, 8);
+    const headMat = new THREE.MeshBasicMaterial({ color: colorHex });
+    const head = new THREE.Mesh(headGeom, headMat);
+    head.position.y = isUpward ? 0.54 : -0.54;
+    if (!isUpward) {
+      head.rotation.x = Math.PI;
+    }
+
+    // Precession cone tilt container (~14° cone angle)
+    const arrowContainer = new THREE.Group();
+    arrowContainer.add(shaft, head);
+    arrowContainer.rotation.z = isUpward ? 0.24 : -0.24;
+
+    pivot.add(arrowContainer);
+    return pivot;
+  }
+
+  // -------------------------------------------------------------------------
+  // 1. Sublattice A: Cyan Glowing Spheres with Upward Precessing Spin Vectors
+  // -------------------------------------------------------------------------
+  const sublatticeAGroup = new THREE.Group();
+  const sitesA = [
+    new THREE.Vector3(-0.85, 0.85, -0.85),
+    new THREE.Vector3(0.85, 0.85, 0.85),
+    new THREE.Vector3(-0.85, -0.85, 0.85),
+    new THREE.Vector3(0.85, -0.85, -0.85),
+  ];
+
+  sitesA.forEach((pos) => {
+    // Cyan atom core sphere
+    const sphereGeom = new THREE.SphereGeometry(0.18, 16, 16);
+    const sphereMat = new THREE.MeshBasicMaterial({ color: 0x06b6d4 });
+    const sphere = new THREE.Mesh(sphereGeom, sphereMat);
+    sphere.position.copy(pos);
+    sublatticeAGroup.add(sphere);
+
+    // Cyan glowing particle halo
+    const spriteMat = new THREE.SpriteMaterial({
+      map: particleTex,
+      color: 0x22d3ee,
+      transparent: true,
+      opacity: 0.85,
+      blending: THREE.AdditiveBlending
+    });
+    const sprite = new THREE.Sprite(spriteMat);
+    sprite.position.copy(pos);
+    sprite.scale.set(0.65, 0.65, 0.65);
+    sublatticeAGroup.add(sprite);
+
+    // Upward precessing spin vector
+    const arrowPivot = createSpinArrow(0x22d3ee, true);
+    arrowPivot.position.copy(pos);
+    sublatticeAGroup.add(arrowPivot);
+    spinPivotsA.push(arrowPivot);
+  });
+
+  group.add(sublatticeAGroup);
+  components.push({
+    id: 'sublattice-a',
+    name: 'Sublattice A (Cyan Spin-Up)',
+    badge: '100% Spin-Polarized State • Upward Moments',
+    color: '#06b6d4',
+    object: sublatticeAGroup,
+    basePosition: new THREE.Vector3(0, 0, 0),
+    explodeOffset: new THREE.Vector3(0, 1.8, 0),
+    anchorLocal: new THREE.Vector3(0.85, 0.85, 0.85),
+    desc: 'Crystalline sublattice of magnetic ions (Cr/Ru) carrying coherent spin-up magnetic moments precessing at Terahertz resonance.'
+  });
+
+  // -------------------------------------------------------------------------
+  // 2. Sublattice B: Amber Glowing Spheres with Downward Antiparallel Spins
+  // -------------------------------------------------------------------------
+  const sublatticeBGroup = new THREE.Group();
+  const sitesB = [
+    new THREE.Vector3(0, 0, 0),       // Central unit cell ion
+    new THREE.Vector3(-0.85, 0.85, 0.85),
+    new THREE.Vector3(0.85, 0.85, -0.85),
+    new THREE.Vector3(-0.85, -0.85, -0.85),
+    new THREE.Vector3(0.85, -0.85, 0.85),
+  ];
+
+  sitesB.forEach((pos) => {
+    // Amber atom core sphere
+    const sphereGeom = new THREE.SphereGeometry(0.18, 16, 16);
+    const sphereMat = new THREE.MeshBasicMaterial({ color: 0xf59e0b });
+    const sphere = new THREE.Mesh(sphereGeom, sphereMat);
+    sphere.position.copy(pos);
+    sublatticeBGroup.add(sphere);
+
+    // Amber glowing particle halo
+    const spriteMat = new THREE.SpriteMaterial({
+      map: particleTex,
+      color: 0xfbbf24,
+      transparent: true,
+      opacity: 0.85,
+      blending: THREE.AdditiveBlending
+    });
+    const sprite = new THREE.Sprite(spriteMat);
+    sprite.position.copy(pos);
+    sprite.scale.set(0.65, 0.65, 0.65);
+    sublatticeBGroup.add(sprite);
+
+    // Downward antiparallel precessing spin vector
+    const arrowPivot = createSpinArrow(0xfbbf24, false);
+    arrowPivot.position.copy(pos);
+    sublatticeBGroup.add(arrowPivot);
+    spinPivotsB.push(arrowPivot);
+  });
+
+  group.add(sublatticeBGroup);
+  components.push({
+    id: 'antiparallel-sublattices',
+    name: 'Antiparallel Sublattices (M = 0)',
+    badge: 'Zero Net Dipole • Zero Stray Dipolar Fields',
+    color: '#f59e0b',
+    object: sublatticeBGroup,
+    basePosition: new THREE.Vector3(0, 0, 0),
+    explodeOffset: new THREE.Vector3(0, -1.8, 0),
+    anchorLocal: new THREE.Vector3(0, 0, 0),
+    desc: 'Sublattices A and B have strictly antiparallel spin orientations that cancel to zero net magnetization (M = 0), preventing crosstalk between adjacent spintronic bits.'
+  });
+
+  // -------------------------------------------------------------------------
+  // 3. Rotated Local Non-Magnetic Ligand Cages (Crystal-Rotation Symmetry)
+  // -------------------------------------------------------------------------
+  const ligandCagesGroup = new THREE.Group();
+
+  // Outer Crystalline Unit Cell Wireframe Box
+  const unitBoxGeom = new THREE.BoxGeometry(2.2, 2.2, 2.2);
+  const unitBoxWire = new THREE.WireframeGeometry(unitBoxGeom);
+  const unitBoxLine = new THREE.LineSegments(
+    unitBoxWire,
+    new THREE.LineBasicMaterial({ color: 0x475569, transparent: true, opacity: 0.55 })
+  );
+  ligandCagesGroup.add(unitBoxLine);
+
+  // Local non-magnetic ligand octahedra around Sublattice A sites (0° rotation)
+  sitesA.forEach((pos) => {
+    const octGeom = new THREE.OctahedronGeometry(0.48);
+    const octWire = new THREE.WireframeGeometry(octGeom);
+    const cageA = new THREE.LineSegments(
+      octWire,
+      new THREE.LineBasicMaterial({ color: 0x06b6d4, transparent: true, opacity: 0.45, blending: THREE.AdditiveBlending })
+    );
+    cageA.position.copy(pos);
+    ligandCagesGroup.add(cageA);
+  });
+
+  // Local non-magnetic ligand octahedra around Sublattice B sites (ROTATED 90° relative to A)
+  sitesB.forEach((pos) => {
+    const octGeom = new THREE.OctahedronGeometry(0.48);
+    const octWire = new THREE.WireframeGeometry(octGeom);
+    const cageB = new THREE.LineSegments(
+      octWire,
+      new THREE.LineBasicMaterial({ color: 0xf59e0b, transparent: true, opacity: 0.45, blending: THREE.AdditiveBlending })
+    );
+    cageB.position.copy(pos);
+    cageB.rotation.set(Math.PI / 4, Math.PI / 2, 0); // 90° crystal-rotation symmetry
+    ligandCagesGroup.add(cageB);
+  });
+
+  // Lattice coordination bonding struts
+  const bondPts = [];
+  sitesA.forEach((aPos) => {
+    bondPts.push(0, 0, 0, aPos.x, aPos.y, aPos.z);
+  });
+  const bondGeom = new THREE.BufferGeometry();
+  bondGeom.setAttribute('position', new THREE.Float32BufferAttribute(bondPts, 3));
+  const bondLines = new THREE.LineSegments(
+    bondGeom,
+    new THREE.LineBasicMaterial({ color: 0x64748b, transparent: true, opacity: 0.35 })
+  );
+  ligandCagesGroup.add(bondLines);
+
+  group.add(ligandCagesGroup);
+  components.push({
+    id: 'ligand-cages',
+    name: 'Crystal-Rotation Symmetry',
+    badge: 'Rotated 90° Octahedral Ligand Cages',
+    color: '#f59e0b',
+    object: ligandCagesGroup,
+    basePosition: new THREE.Vector3(0, 0, 0),
+    explodeOffset: new THREE.Vector3(1.8, 0, -1.6),
+    anchorLocal: new THREE.Vector3(1.1, 0, 0),
+    desc: 'Local non-magnetic ligand octahedra are rotated by 90° between Sublattices A and B. This spatial rotation breaks time-reversal symmetry without requiring net magnetic dipoles.'
+  });
+
+  // -------------------------------------------------------------------------
+  // 4. Momentum-Space Spin-Splitting Lobes (d-wave / g-wave)
+  // -------------------------------------------------------------------------
+  const fermiLobeGroup = new THREE.Group();
+
+  // 4 alternating d-wave Fermi lobes (dx2-y2 style in momentum space)
+  // Lobe 1 (+X & -X): Spin-Up Cyan
+  const lobeGeomX = new THREE.SphereGeometry(0.55, 20, 20);
+  lobeGeomX.scale(1.7, 0.75, 0.75);
+
+  const matCyanLobe = new THREE.MeshBasicMaterial({
+    color: 0x06b6d4,
+    transparent: true,
+    opacity: 0.28,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false,
+    side: THREE.DoubleSide
+  });
+  const matCyanWire = new THREE.LineBasicMaterial({
+    color: 0x22d3ee,
+    transparent: true,
+    opacity: 0.6,
+    blending: THREE.AdditiveBlending
+  });
+
+  const lobePosX = new THREE.Mesh(lobeGeomX, matCyanLobe);
+  lobePosX.position.set(0.95, 0, 0);
+  lobePosX.add(new THREE.LineSegments(new THREE.WireframeGeometry(lobeGeomX), matCyanWire));
+
+  const lobeNegX = new THREE.Mesh(lobeGeomX, matCyanLobe);
+  lobeNegX.position.set(-0.95, 0, 0);
+  lobeNegX.add(new THREE.LineSegments(new THREE.WireframeGeometry(lobeGeomX), matCyanWire));
+
+  // Lobe 2 (+Z & -Z): Spin-Down Amber
+  const lobeGeomZ = new THREE.SphereGeometry(0.55, 20, 20);
+  lobeGeomZ.scale(0.75, 0.75, 1.7);
+
+  const matAmberLobe = new THREE.MeshBasicMaterial({
+    color: 0xf59e0b,
+    transparent: true,
+    opacity: 0.28,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false,
+    side: THREE.DoubleSide
+  });
+  const matAmberWire = new THREE.LineBasicMaterial({
+    color: 0xfbbf24,
+    transparent: true,
+    opacity: 0.6,
+    blending: THREE.AdditiveBlending
+  });
+
+  const lobePosZ = new THREE.Mesh(lobeGeomZ, matAmberLobe);
+  lobePosZ.position.set(0, 0, 0.95);
+  lobePosZ.add(new THREE.LineSegments(new THREE.WireframeGeometry(lobeGeomZ), matAmberWire));
+
+  const lobeNegZ = new THREE.Mesh(lobeGeomZ, matAmberLobe);
+  lobeNegZ.position.set(0, 0, -0.95);
+  lobeNegZ.add(new THREE.LineSegments(new THREE.WireframeGeometry(lobeGeomZ), matAmberWire));
+
+  // Central momentum k-space origin node
+  const kNodeGeom = new THREE.SphereGeometry(0.12, 12, 12);
+  const kNodeMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+  const kNode = new THREE.Mesh(kNodeGeom, kNodeMat);
+
+  fermiLobeGroup.add(lobePosX, lobeNegX, lobePosZ, lobeNegZ, kNode);
+
+  group.add(fermiLobeGroup);
+  components.push({
+    id: 'fermi-lobes',
+    name: 'Alternating Spin-Split Bands (THz)',
+    badge: 'd-wave Momentum Splitting • Zero Stray Field',
+    color: '#06b6d4',
+    object: fermiLobeGroup,
+    basePosition: new THREE.Vector3(0, 0, 0),
+    explodeOffset: new THREE.Vector3(-1.8, 0, 1.6),
+    anchorLocal: new THREE.Vector3(0, 0, 1.3),
+    desc: 'Alternating d-wave Fermi lobes yield 100% spin-polarized conduction currents at Terahertz frequencies with pure M = 0 zero stray dipolar field leakage.'
+  });
+
+  // Dynamic animation loop for high-speed precession & Fermi pulse
+  const update = (time, explode) => {
+    const spinAngleA = time * 0.007;
+    const spinAngleB = spinAngleA + Math.PI;
+
+    for (let i = 0; i < spinPivotsA.length; i++) {
+      spinPivotsA[i].rotation.y = spinAngleA;
+    }
+    for (let i = 0; i < spinPivotsB.length; i++) {
+      spinPivotsB[i].rotation.y = spinAngleB;
+    }
+
+    const pulse = 1.0 + Math.sin(time * 0.005) * 0.09;
+    fermiLobeGroup.scale.set(pulse, pulse, pulse);
+  };
+
+  return {
+    id: 'altermagnetism-thz',
+    title: 'Altermagnetism',
+    subtitle: 'THz Zero-Dipole',
+    category: 'Quantum Spintronics (CrSb / RuO2)',
+    threatLevel: 'Zero REE (M = 0 Terahertz)',
+    group,
+    components,
+    update
+  };
+}
+
 // Registry map of model builders
 export const MODEL_BUILDERS = [
   { id: 'ndfeb-ipmsm', title: 'NdFeB IPMSM', subtitle: 'Baseline Commercial', builder: buildNdFeBIPMSM, accent: '#ef4444' },
   { id: 'ferrite-synrm', title: 'Ferrite PMa-SynRM', subtitle: 'Zero Rare Earths', builder: buildFerriteSynRM, accent: '#10b981' },
-  { id: 'eesm-wound-rotor', title: 'EESM Wound-Rotor', subtitle: '100% Copper Field', builder: buildEESMWoundRotor, accent: '#a855f7' },
+  { id: 'eesm-wound-rotor', title: 'EESM Wound-Rotor', subtitle: '100% Copper Field', builder: buildEESMWoundRotor, accent: '#f59e0b' },
   { id: 'curvilinear-nanowire', title: 'Curvilinear Nanowire', subtitle: '440 Oe Shape Coercivity', builder: buildCurvilinearNanowire, accent: '#06b6d4' },
   { id: 'mgb2-superconductor', title: 'MgB2 Superconductor', subtitle: '20K Cryogenic Lossless', builder: buildMgB2Superconductor, accent: '#38bdf8' },
+  { id: 'altermagnetism-thz', title: 'Altermagnetism', subtitle: 'THz Zero-Dipole', builder: buildAltermagnetUnitCell, accent: '#06b6d4' },
 ];

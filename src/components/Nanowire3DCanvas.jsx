@@ -41,7 +41,7 @@ export default function Nanowire3DCanvas({ aspectRatio = 28, curvature = 0.65 })
       dirLight1.position.set(5, 8, 5);
       scene.add(dirLight1);
 
-      const dirLight2 = new THREE.DirectionalLight(0x818cf8, 2.5);
+      const dirLight2 = new THREE.DirectionalLight(0x06b6d4, 2.5);
       dirLight2.position.set(-5, -6, -3);
       scene.add(dirLight2);
 
@@ -85,7 +85,7 @@ export default function Nanowire3DCanvas({ aspectRatio = 28, curvature = 0.65 })
         const pt = curve.getPoint(tNode);
         const nodeGeom = new THREE.SphereGeometry(wireRadius * 1.5, 10, 10);
         const nodeMat = new THREE.MeshBasicMaterial({
-          color: n % 2 === 0 ? 0x00f2fe : 0x818cf8,
+          color: n % 2 === 0 ? 0x00f2fe : 0x06b6d4,
         });
         const nodeMesh = new THREE.Mesh(nodeGeom, nodeMat);
         nodeMesh.position.copy(pt);
@@ -156,7 +156,7 @@ export default function Nanowire3DCanvas({ aspectRatio = 28, curvature = 0.65 })
             <defs>
               <linearGradient id="svgHelix" x1="0%" y1="0%" x2="100%" y2="100%">
                 <stop offset="0%" stopColor="#00f2fe" />
-                <stop offset="50%" stopColor="#818cf8" />
+                <stop offset="50%" stopColor="#06b6d4" />
                 <stop offset="100%" stopColor="#00f2fe" />
               </linearGradient>
             </defs>
@@ -168,12 +168,12 @@ export default function Nanowire3DCanvas({ aspectRatio = 28, curvature = 0.65 })
               strokeLinecap="round"
             />
             <circle cx="40" cy="100" r="6" fill="#00f2fe" />
-            <circle cx="120" cy="100" r="6" fill="#818cf8" />
+            <circle cx="120" cy="100" r="6" fill="#06b6d4" />
             <circle cx="200" cy="100" r="6" fill="#00f2fe" />
-            <circle cx="280" cy="100" r="6" fill="#818cf8" />
+            <circle cx="280" cy="100" r="6" fill="#06b6d4" />
           </svg>
           <div className="text-[11px] font-mono text-cyan-300">
-            Curvilinear Fe-Ni-P Lattice Projection &bull; Aspect {aspectRatio}:1
+            Curvilinear Fe-Ni-P Lattice Projection • Aspect {aspectRatio}:1
           </div>
         </div>
       ) : (
@@ -187,7 +187,7 @@ export default function Nanowire3DCanvas({ aspectRatio = 28, curvature = 0.65 })
       </div>
 
       <div className="absolute bottom-3 right-3 text-[10px] font-mono px-2.5 py-1 rounded-md bg-slate-950/80 border border-cyan-800 text-cyan-300 backdrop-blur-md pointer-events-none">
-        {webGLError ? 'Curvilinear Chiral Helix' : 'Click & Drag to Rotate &bull; Dynamic Chiral Nodes'}
+        {webGLError ? 'Curvilinear Chiral Helix' : 'Click & Drag to Rotate • Dynamic Chiral Nodes'}
       </div>
     </div>
   );

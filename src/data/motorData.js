@@ -181,7 +181,7 @@ export const COERCIVITY_BENCHMARKS = [
     name: 'Iron Nitride (Fe₁₆N₂)',
     category: 'Emerging Non-RE Bulk',
     coercivityOe: 2100,
-    color: '#818cf8',
+    color: '#38bdf8',
     description: 'Metastable alpha-prime Fe16N2; phase instability above 150°C',
     isInteractive: false,
   },

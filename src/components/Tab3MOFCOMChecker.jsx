@@ -14,20 +14,17 @@ import {
   Scale,
   Building2,
   AlertOctagon,
-  FileText
+  FileText,
+  Activity,
+  CheckCircle2
 } from 'lucide-react';
 
 export default function Tab3MOFCOMChecker() {
   const [selectedGrade, setSelectedGrade] = useState('N48UH');
-  const [dyTbContent, setDyTbContent] = useState(3.5); // wt.% (0 to 5%)
 
   const grade = MAGNET_GRADES[selectedGrade];
-
-  // When user switches grade, reset dyTbContent to typical default for that grade
-  const handleGradeChange = (gradeKey) => {
-    setSelectedGrade(gradeKey);
-    setDyTbContent(MAGNET_GRADES[gradeKey].defaultDyTb);
-  };
+  // Direct derivation: HREE wt.% is driven strictly by the selected magnet grade card
+  const dyTbContent = grade.defaultDyTb;
 
   // Compliance Logic:
   // 1. April 2025 MOFCOM License Requirement:
@@ -56,7 +53,7 @@ export default function Tab3MOFCOMChecker() {
           </div>
           <div>
             <h2 className="text-base font-bold text-white flex items-center gap-2">
-              MOFCOM Export Compliance & De Minimis Risk Engine
+              MOFCOM Export Compliance &amp; De Minimis Risk Engine
               <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-rose-900/60 text-rose-300 border border-rose-700/50">
                 Customs Verification
               </span>
@@ -69,15 +66,15 @@ export default function Tab3MOFCOMChecker() {
 
         <div className="px-3 py-2 rounded-xl bg-slate-950/80 border border-slate-800 text-right">
           <span className="text-[10px] uppercase font-mono text-slate-400 block">Authority</span>
-          <span className="text-xs font-bold text-white font-mono">MOFCOM &bull; GACC Dual-Use</span>
+          <span className="text-xs font-bold text-white font-mono">MOFCOM • GACC Dual-Use</span>
         </div>
       </div>
 
       {/* Main Interactive Controls & Live Compliance Badges */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         
-        {/* Left Column: Grade Selector & Dy/Tb Slider */}
-        <div className="lg:col-span-5 space-y-6">
+        {/* Left Column: Grade Selector & Direct Formulation Assay Readout (7 cols) */}
+        <div className="lg:col-span-7 space-y-6">
           
           <div className="p-6 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-6">
             
@@ -86,9 +83,9 @@ export default function Tab3MOFCOMChecker() {
               <label className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center justify-between font-mono">
                 <span className="flex items-center gap-2">
                   <span className="w-5 h-5 rounded-full bg-cyan-500/20 text-cyan-400 border border-cyan-500/40 flex items-center justify-center text-[11px]">1</span>
-                  Select Sintered NdFeB Grade
+                  Select Sintered NdFeB Magnet Grade
                 </span>
-                <span className="text-slate-400 font-normal">Thermal Class</span>
+                <span className="text-slate-400 font-normal">Thermal Class • HREE Loading</span>
               </label>
 
               <div className="grid grid-cols-2 gap-2.5">
@@ -99,17 +96,17 @@ export default function Tab3MOFCOMChecker() {
                   return (
                     <button
                       key={g.id}
-                      onClick={() => handleGradeChange(g.id)}
-                      className={`text-left p-3 rounded-xl border transition-all ${
+                      onClick={() => setSelectedGrade(g.id)}
+                      className={`text-left p-3.5 rounded-xl border transition-all ${
                         isSelected
-                          ? 'bg-gradient-to-br from-cyan-950/60 to-slate-900 border-cyan-500/60 shadow-glow-cyan'
+                          ? 'bg-gradient-to-br from-cyan-950/60 to-slate-900 border-cyan-500/60 shadow-glow-cyan ring-1 ring-cyan-500/40'
                           : 'bg-slate-950/60 border-slate-800 hover:border-slate-700 hover:bg-slate-850'
                       }`}
                     >
                       <div className="flex items-center justify-between mb-1">
                         <span className="font-bold text-sm text-white font-mono">{g.name}</span>
-                        <span className={`text-[9px] font-mono px-1.5 py-0.5 rounded ${
-                          isLree ? 'bg-emerald-500/20 text-emerald-300' : 'bg-rose-500/20 text-rose-300'
+                        <span className={`text-[9px] font-mono px-1.5 py-0.5 rounded font-bold ${
+                          isLree ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-rose-500/20 text-rose-300 border border-rose-500/30'
                         }`}>
                           {g.maxTemp}
                         </span>
@@ -117,8 +114,8 @@ export default function Tab3MOFCOMChecker() {
                       <p className="text-[10px] text-slate-400 line-clamp-1">{g.subtitle}</p>
                       <div className="text-[10px] text-slate-400 font-mono mt-2 pt-1.5 border-t border-slate-800/80 flex justify-between">
                         <span>Hcj: {g.hcjKoe}</span>
-                        <span className={isLree ? 'text-emerald-400 font-bold' : 'text-amber-400'}>
-                          {isLree ? '0% HREE' : '~' + g.defaultDyTb + '% HREE'}
+                        <span className={isLree ? 'text-emerald-400 font-bold' : 'text-amber-400 font-bold'}>
+                          {isLree ? '0.0% HREE' : g.defaultDyTb + ' wt.% Dy/Tb'}
                         </span>
                       </div>
                     </button>
@@ -127,49 +124,57 @@ export default function Tab3MOFCOMChecker() {
               </div>
             </div>
 
-            {/* Input 2: Dy / Tb Content Slider (0% to 5%) */}
+            {/* Direct Formulation & Customs ICP-MS Assay Readout (Replaces Redundant Slider) */}
             <div className="space-y-3 pt-4 border-t border-slate-800">
               <div className="flex justify-between items-center text-xs">
                 <label className="font-semibold text-slate-300 flex items-center gap-1.5 font-mono">
                   <span className="w-5 h-5 rounded-full bg-cyan-500/20 text-cyan-400 border border-cyan-500/40 flex items-center justify-center text-[11px]">2</span>
-                  Dysprosium (Dy) + Terbium (Tb) Weight %
+                  Heavy Rare Earth Formulation &amp; ICP-MS Assay Readout
                 </label>
                 <span className={`font-mono font-bold px-2.5 py-0.5 rounded text-sm ${
                   dyTbContent >= 0.1 
                     ? 'bg-rose-950/80 text-rose-300 border border-rose-700' 
                     : 'bg-emerald-950/80 text-emerald-300 border border-emerald-700'
                 }`}>
-                  {dyTbContent.toFixed(1)} wt.%
+                  {dyTbContent.toFixed(1)} wt.% Dy/Tb
                 </span>
               </div>
 
-              <input
-                type="range"
-                min="0.0"
-                max="5.0"
-                step="0.1"
-                value={dyTbContent}
-                onChange={(e) => setDyTbContent(Number(e.target.value))}
-                className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-rose-500"
-              />
+              {/* Progress & Limit Visualizer Bar */}
+              <div className="p-3.5 rounded-xl bg-slate-950/80 border border-slate-800 space-y-2 font-mono">
+                <div className="flex justify-between text-[11px]">
+                  <span className="text-slate-400">Assay Composition:</span>
+                  <span className={dyTbContent >= 0.1 ? 'text-rose-400 font-bold' : 'text-emerald-400 font-bold'}>
+                    {grade.heavyReElements}
+                  </span>
+                </div>
 
-              <div className="flex justify-between text-[10px] text-slate-400 font-mono">
-                <span className="text-emerald-400 font-bold">0.0% (LREE Pure)</span>
-                <span className="text-amber-400 font-bold">0.10% (De Minimis Line)</span>
-                <span className="text-rose-400 font-bold">5.0% (Heavy EH Grade)</span>
+                <div className="h-2.5 w-full bg-slate-800 rounded-full overflow-hidden flex relative">
+                  {/* Safe Harbor Marker line at 0.10% (scaled to 5.0% max = 2% width position) */}
+                  <div 
+                    className="h-full bg-cyan-500 transition-all duration-300"
+                    style={{ width: `${Math.min(100, Math.max(3, (dyTbContent / 5.0) * 100))}%` }}
+                  />
+                </div>
+
+                <div className="flex justify-between text-[10px] text-slate-400">
+                  <span className="text-emerald-400 font-bold">0.0% (LREE Pure N52)</span>
+                  <span className="text-amber-400 font-bold">0.10% (Jan 2027 De Minimis Limit)</span>
+                  <span className="text-rose-400 font-bold">5.0% (EH Grade)</span>
+                </div>
               </div>
 
               {/* Threshold Indicator Callout */}
-              <div className="p-3 rounded-xl bg-slate-950/60 border border-slate-800 text-[11px] font-mono space-y-1">
+              <div className="p-3 rounded-xl bg-slate-950/60 border border-slate-800 text-[11px] font-mono space-y-1.5">
                 <div className="flex justify-between items-center">
-                  <span className="text-slate-400">Current HREE Content:</span>
+                  <span className="text-slate-400">Regulatory Assessment:</span>
                   <span className={`font-bold ${dyTbContent >= 0.1 ? 'text-rose-400' : 'text-emerald-400'}`}>
-                    {dyTbContent >= 0.1 ? `${dyTbContent.toFixed(1)}% (EXCEEDS 0.1% LIMIT)` : `${dyTbContent.toFixed(1)}% (BELOW LIMIT)`}
+                    {dyTbContent >= 0.1 ? `${dyTbContent.toFixed(1)} wt.% EXCEEDS 0.1% DE MINIMIS THRESHOLD` : `${dyTbContent.toFixed(1)} wt.% FULLY COMPLIANT (BELOW LIMIT)`}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-slate-400">Customs Sampling Method:</span>
-                  <span className="text-slate-300">GB/T 18882 ICP-MS Assay</span>
+                  <span className="text-slate-300">GB/T 18882 ICP-MS Assay (10 ppm Sensitivity)</span>
                 </div>
               </div>
             </div>
@@ -178,13 +183,13 @@ export default function Tab3MOFCOMChecker() {
             <div className="p-3.5 rounded-xl bg-slate-950/40 border border-slate-800 text-xs space-y-2">
               <div className="font-semibold text-slate-300 flex items-center gap-1.5">
                 <Info className="w-3.5 h-3.5 text-cyan-400" />
-                {grade.name} Thermal Specification
+                {grade.name} Thermal Specification • {grade.maxTemp} Limit
               </div>
               <p className="text-slate-400 text-[11px] leading-relaxed">
                 {grade.description}
               </p>
               <div className="text-[10px] text-slate-400 font-mono pt-1">
-                Typical Automotive Application: <span className="text-slate-200">{grade.typicalUses}</span>
+                Typical Application: <span className="text-slate-200">{grade.typicalUses}</span>
               </div>
             </div>
 
@@ -192,8 +197,8 @@ export default function Tab3MOFCOMChecker() {
 
         </div>
 
-        {/* Right Column: Instant Red/Green Compliance Badges & Supply Chain Audits */}
-        <div className="lg:col-span-7 space-y-6">
+        {/* Right Column: Instant Red/Green Compliance Badges & Supply Chain Audits (5 cols) */}
+        <div className="lg:col-span-5 space-y-6">
           
           {/* TWO PRIMARY COMPLIANCE OUTPUTS REQUIRED BY PROMPT */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -369,7 +374,7 @@ export default function Tab3MOFCOMChecker() {
                 </div>
                 <div>
                   <div className="font-bold text-white text-[12px]">
-                    Transition Primary Axle to EESM or PMa-SynRM (See Tab 1)
+                    Transition Primary Axle to EESM or PMa-SynRM (See Stage 01)
                   </div>
                   <p className="text-slate-400 text-[11px] mt-0.5 leading-relaxed">
                     Adopt BMW/Renault wound-rotor synchronous (EESM) or Nissan ferrite-assisted SynRM architectures to achieve 100% decoupling from Chinese heavy rare earth export licensing.
@@ -379,11 +384,11 @@ export default function Tab3MOFCOMChecker() {
 
               <div className="p-3 rounded-xl bg-slate-950/60 border border-slate-800 flex items-start gap-3">
                 <div className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 mt-0.5">
-                  <CheckCircle className="w-4 h-4" />
+                  <CheckCircle2 className="w-4 h-4" />
                 </div>
                 <div>
                   <div className="font-bold text-white text-[12px]">
-                    Ex-China Heavy Rare Earth Tolling & GBD Optimization
+                    Ex-China Heavy Rare Earth Tolling &amp; GBD Optimization
                   </div>
                   <p className="text-slate-400 text-[11px] mt-0.5 leading-relaxed">
                     If NdFeB is retained, engineer heavy grain boundary diffusion (GBD) to cut Dy/Tb below 0.10 wt.% or contract secondary tolling via Lynas / MP Materials / VAC Magnetics.

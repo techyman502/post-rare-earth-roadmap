@@ -11,7 +11,7 @@ export default function Stage1MotorSwappers({ pricingScenario, setPricingScenari
         <div>
           <div className="flex items-center gap-2">
             <span className="px-2.5 py-0.5 rounded text-[11px] font-mono font-bold bg-cyan-950/80 text-cyan-400 border border-cyan-700/60 uppercase tracking-wider">
-              STAGE 1 &bull; TODAY (2026)
+              STAGE 1 • TODAY (2026)
             </span>
             <span className="text-xs font-mono text-slate-400">Production Series Architecture</span>
           </div>

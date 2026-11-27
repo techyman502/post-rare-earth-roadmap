@@ -80,7 +80,7 @@ export default function Tab2GeometryLab() {
           <linearGradient id="wireGradient" x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stopColor="#00f2fe" />
             <stop offset="50%" stopColor="#38bdf8" />
-            <stop offset="100%" stopColor="#818cf8" />
+            <stop offset="100%" stopColor="#06b6d4" />
           </linearGradient>
           <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
             <feGaussianBlur stdDeviation="3" result="blur" />
@@ -133,7 +133,7 @@ export default function Tab2GeometryLab() {
           L/d Aspect: {aspectRatio}:1
         </text>
         <text x="35" y="165" fill="#00f2fe" fontSize="10" fontFamily="monospace">
-          Curvature &kappa;: {curvatureFactor.toFixed(2)} &bull; Fe-Ni-P Lattice
+          Curvature κ: {curvatureFactor.toFixed(2)} • Fe-Ni-P Lattice
         </text>
       </svg>
     );

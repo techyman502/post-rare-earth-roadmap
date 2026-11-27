@@ -174,7 +174,7 @@ export default function RightStageCanvas({ activeStage = 1 }) {
         const tNode = n / 7;
         const pt = wireCurve.getPoint(tNode);
         const nodeG = new THREE.SphereGeometry(0.2, 10, 10);
-        const nodeM = new THREE.MeshBasicMaterial({ color: n % 2 === 0 ? 0x00f2fe : 0x818cf8 });
+        const nodeM = new THREE.MeshBasicMaterial({ color: n % 2 === 0 ? 0x00f2fe : 0x06b6d4 });
         const nodeObj = new THREE.Mesh(nodeG, nodeM);
         nodeObj.position.copy(pt);
         stage3Group.add(nodeObj);
@@ -343,7 +343,7 @@ export default function RightStageCanvas({ activeStage = 1 }) {
             Hardware 3D Mesh Mode (Stage 0{activeStage})
           </div>
           <div className="w-56 h-56 rounded-full border border-cyan-500/30 flex items-center justify-center animate-pulse">
-            <div className="w-36 h-36 rounded-full border border-dashed border-violet-500/40 animate-spin" />
+            <div className="w-36 h-36 rounded-full border border-dashed border-cyan-500/40 animate-spin" />
           </div>
         </div>
       ) : (
@@ -353,7 +353,7 @@ export default function RightStageCanvas({ activeStage = 1 }) {
       {/* Floating 3D Control Pill */}
       <div className="absolute bottom-8 right-8 text-[11px] font-mono px-3 py-1.5 rounded-full bg-slate-950/70 border border-slate-800 text-slate-400 backdrop-blur-md flex items-center gap-2 pointer-events-none">
         <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping" />
-        <span>Stage 0{activeStage} &bull; Drag to rotate 3D</span>
+        <span>Stage 0{activeStage} • Drag to rotate 3D</span>
       </div>
     </div>
   );
